@@ -92,8 +92,10 @@ inline fixed UnitySampleShadowmap (float4 shadowCoord)
         // 1-tap shadows
         #if defined (SHADOWS_NATIVE)
             half shadow = UNITY_SAMPLE_SHADOW_PROJ(_ShadowMapTexture, shadowCoord);
+            //_LightShadowData.r等于 (1 - inspector.shadow.strength)
             shadow = lerp(_LightShadowData.r, 1.0f, shadow);
         #else
+            //这里应该有reverse-z，采样到的z值比采样点的z值小的话，说明采样点更靠近光源，没有处于阴影中。
             half shadow = SAMPLE_DEPTH_TEXTURE_PROJ(_ShadowMapTexture, UNITY_PROJ_COORD(shadowCoord)) < (shadowCoord.z / shadowCoord.w) ? _LightShadowData.r : 1.0;
         #endif
 
@@ -312,6 +314,7 @@ float3 UnityGetReceiverPlaneDepthBias(float3 shadowCoord, float biasMultiply)
 
     biasUVZ.x = dy.y * dx.z - dx.y * dy.z;
     biasUVZ.y = dx.x * dy.z - dy.x * dx.z;
+    //biasMultiply default = 1.0
     biasUVZ.xy *= biasMultiply / ((dx.x * dy.y) - (dx.y * dy.x));
 
     // Static depth biasing to make up for incorrect fractional sampling on the shadow map grid.

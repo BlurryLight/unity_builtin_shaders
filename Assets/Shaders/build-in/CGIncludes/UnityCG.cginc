@@ -479,6 +479,7 @@ half LinearRgbToLuminance(half3 linearRgb)
 
 half4 UnityEncodeRGBM (half3 color, float maxRGBM)
 {
+    //虽然这个式子比较魔幻，但是实际上就是把color[0,maxRGBM]重新编码到[0,1]范围,并且是非线性的
     float kOneOverRGBMMaxRange = 1.0 / maxRGBM;
     const float kMinMultiplier = 2.0 * 1e-2;
 
@@ -585,6 +586,8 @@ inline half3 DecodeDirectionalLightmap (half3 color, fixed4 dirTex, half3 normal
 // Encoding/decoding [0..1) floats into 8 bit/channel RGBA. Note that 1.0 will not be encoded properly.
 inline float4 EncodeFloatRGBA( float v )
 {
+    //https://stackoverflow.com/questions/41566049/understanding-unitys-rgba-encoding-in-float-encodefloatrgba?noredirect=1&lq=1
+    
     float4 kEncodeMul = float4(1.0, 255.0, 65025.0, 16581375.0);
     float kEncodeBit = 1.0/255.0;
     float4 enc = kEncodeMul * v;
@@ -663,9 +666,12 @@ inline fixed3 UnpackNormalDXT5nm (fixed4 packednormal)
 fixed3 UnpackNormalmapRGorAG(fixed4 packednormal)
 {
     // This do the trick
+    // DXT5 or BC5 ,the packednormal.x will always be the true 
    packednormal.x *= packednormal.w;
 
     fixed3 normal;
+    // the packednormal.y will always be the true y
+    // remap to [-1,1]
     normal.xy = packednormal.xy * 2 - 1;
     normal.z = sqrt(1 - saturate(dot(normal.xy, normal.xy)));
     return normal;

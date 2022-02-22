@@ -86,6 +86,8 @@ CBUFFER_END
 
 
 CBUFFER_START(UnityPerCameraRare)
+    //以ax+by+cz+d=0的形式存储了frustum的六个平面
+    // 分别是左右下上近远
     float4 unity_CameraWorldClipPlanes[6];
 
 #if !defined(USING_STEREO_MATRICES)
